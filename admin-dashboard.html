@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="th">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>มีตังค์ Admin Dashboard</title>
+        <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .dashboard {
+            padding: 30px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            border-left: 5px solid #4ECDC4;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #4ECDC4;
+        }
+        
+        .controls-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #4ECDC4;
+            padding-bottom: 10px;
+        }
+        
+        .user-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .user-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            background: white;
+        }
+        
+        .user-item:last-child {
+            border-bottom: none;
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .user-id {
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9em;
+        }
+        
+        .user-status {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .bot-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .bot-active {
+            background: #28a745;
+            color: white;
+        }
+        
+        .bot-paused {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-pause {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .btn-resume {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .logs-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+        }
+        
+        .logs-container {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px 0;
+            border-bottom: 1px solid #4a5568;
+        }
+        
+        .log-timestamp {
+            color: #68d391;
+        }
+        
+        .log-user {
+            color: #63b3ed;
+        }
+        
+        .log-action {
+            color: #fbb6ce;
+        }
+        
+        .refresh-btn {
+            background: #4ECDC4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 1em;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online {
+            background: #28a745;
+        }
+        
+        .status-offline {
+            background: #dc3545;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .modal-header {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        
+        .close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: rotate(90deg);
+        }
+        
+        .modal-body {
+            padding: 30px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .conversation-item {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+        
+        .conversation-item.user {
+            justify-content: flex-end;
+        }
+        
+        .conversation-item.assistant {
+            justify-content: flex-start;
+        }
+        
+        .message-bubble {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .message-bubble.user {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message-bubble.assistant {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin: 0 10px;
+            flex-shrink: 0;
+        }
+        
+        .message-avatar.user {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .message-avatar.assistant {
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+            color: white;
+        }
+        
+        .message-time {
+            font-size: 0.75em;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+        
+        .conversation-empty {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .conversation-empty i {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        .btn-view-conversation {
+            background: #17a2b8;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-left: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-view-conversation:hover {
+            background: #138496;
+            transform: translateY(-1px);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🐱 มีตังค์ Admin Dashboard</h1>
+                <p>จัดการและติดตามสถานะของแชทบอท</p>
+            </div>
+
+            <div class="dashboard">
+                <!-- Statistics Section -->
+                <div class="stats-grid" id="stats-grid">
+                    <div class="stat-card">
+                        <h3>🔗 สถานะระบบ</h3>
+                        <div class="stat-value" id="system-status">
+                            <span
+                                class="status-indicator status-online"></span>Online
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>👥 ผู้ใช้ทั้งหมด</h3>
+                        <div class="stat-value" id="total-users">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>🤖 บอทใช้งาน</h3>
+                        <div class="stat-value" id="active-bots">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>⏸️ บอทหยุด</h3>
+                        <div class="stat-value" id="paused-bots">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>💬 ข้อความวันนี้</h3>
+                        <div class="stat-value" id="messages-today">-</div>
+                    </div>
+                </div>
+
+                <!-- Bot Control Section -->
+                <div class="controls-section">
+                    <h2 class="section-title">🎛️ การจัดการบอท</h2>
+                    <button class="refresh-btn" onclick="refreshData()">🔄
+                        รีเฟรชข้อมูล</button>
+
+                    <div class="user-list" id="user-list">
+                        <div class="loading">กำลังโหลดข้อมูล...</div>
+                    </div>
+                </div>
+
+                <!-- Activity Logs Section -->
+                <div class="logs-section">
+                    <h2 class="section-title">📝 บันทึกกิจกรรม</h2>
+                    <div class="logs-container" id="logs-container">
+                        <div class="log-entry">
+                            <span class="log-timestamp">[2025-01-03
+                                15:30:00]</span>
+                            <span class="log-user">System</span>
+                            <span class="log-action">Dashboard
+                                initialized</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversation Modal -->
+        <div id="conversationModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>💬 ประวัติการสนทนา</h2>
+                    <span class="close" onclick="closeConversationModal()">&times;</span>
+                </div>
+                <div class="modal-body" id="conversationModalBody">
+                    <div class="loading">กำลังโหลดข้อมูล...</div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        // Global variables
+        let refreshInterval;
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshData();
+            // Auto-refresh every 30 seconds
+            refreshInterval = setInterval(refreshData, 30000);
+        });
+        
+        // Refresh all data
+        async function refreshData() {
+            try {
+                await Promise.all([
+                    loadSystemStats(),
+                    loadUserList(),
+                    loadActivityLogs()
+                ]);
+                addLogEntry('System', 'Data refreshed');
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+                addLogEntry('System', 'Error refreshing data: ' + error.message);
+            }
+        }
+        
+        // Load system statistics
+        async function loadSystemStats() {
+            try {
+                // Get conversation stats
+                const conversationsResponse = await fetch('/admin/conversations');
+                const conversationsData = await conversationsResponse.json();
+                
+                // Get Pinecone stats
+                const pineconeResponse = await fetch('/vector-stats');
+                const pineconeData = await pineconeResponse.json();
+                
+                // Get bot status stats
+                const statusResponse = await fetch('/admin/bot-status');
+                const statusData = await statusResponse.json();
+                
+                // Update UI
+                document.getElementById('total-users').textContent = conversationsData.totalUsers || 0;
+                document.getElementById('active-bots').textContent = statusData.activeBots || 0;
+                document.getElementById('paused-bots').textContent = statusData.pausedBots || 0;
+                document.getElementById('messages-today').textContent = calculateMessagesTotal(conversationsData.users);
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        // Load user list with bot status
+        async function loadUserList() {
+            try {
+                const response = await fetch('/admin/users');
+                const data = await response.json();
+                
+                const userListEl = document.getElementById('user-list');
+                
+                if (data.success && data.users.length > 0) {
+                    userListEl.innerHTML = data.users.map(user => `
+                        <div class="user-item">
+                            <div class="user-info">
+                                <div class="user-id">👤 ${user.userId.substring(0, 20)}...</div>
+                                <div class="user-status">
+                                    💬 ${user.messageCount} ข้อความ | 
+                                    ⏰ ${formatTime(user.lastMessage?.timestamp)}
+                                </div>
+                            </div>
+                            <div>
+                                <span class="bot-status ${user.botStatus === 'active' ? 'bot-active' : 'bot-paused'}">
+                                    ${user.botStatus === 'active' ? '🤖 ใช้งาน' : '⏸️ หยุด'}
+                                </span>
+                                <button class="btn-view-conversation" onclick="viewConversation('${user.userId}')">💬 ดูสนทนา</button>
+                                ${user.botStatus === 'active' ? 
+                                    `<button class="btn btn-pause" onclick="pauseBot('${user.userId}')">⏸️ หยุดบอท</button>` :
+                                    `<button class="btn btn-resume" onclick="resumeBot('${user.userId}')">▶️ เปิดบอท</button>`
+                                }
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    userListEl.innerHTML = '<div class="loading">ไม่มีผู้ใช้ในระบบ</div>';
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('user-list').innerHTML = '<div class="loading">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+            }
+        }
+        
+        // Load activity logs
+        async function loadActivityLogs() {
+            try {
+                const response = await fetch('/admin/activity-logs');
+                const data = await response.json();
+                
+                if (data.success && data.logs.length > 0) {
+                    const logsEl = document.getElementById('logs-container');
+                    const newLogs = data.logs.slice(-20).map(log => `
+                        <div class="log-entry">
+                            <span class="log-timestamp">[${formatTime(log.timestamp)}]</span>
+                            <span class="log-user">${log.userId || 'System'}</span>
+                            <span class="log-action">${log.action}</span>
+                        </div>
+                    `).join('');
+                    
+                    logsEl.innerHTML = newLogs;
+                    logsEl.scrollTop = logsEl.scrollHeight;
+                }
+            } catch (error) {
+                console.error('Error loading logs:', error);
+            }
+        }
+        
+        // Pause bot for specific user
+        async function pauseBot(userId) {
+            try {
+                const response = await fetch('/admin/pause-bot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userId })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    addLogEntry('Admin', `Paused bot for user ${userId.substring(0, 10)}...`);
+                    await loadUserList();
+                } else {
+                    alert('เกิดข้อผิดพลาดในการหยุดบอท: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error pausing bot:', error);
+                alert('เกิดข้อผิดพลาดในการหยุดบอท');
+            }
+        }
+        
+        // Resume bot for specific user
+        async function resumeBot(userId) {
+            try {
+                const response = await fetch('/admin/resume-bot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userId })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    addLogEntry('Admin', `Resumed bot for user ${userId.substring(0, 10)}...`);
+                    await loadUserList();
+                } else {
+                    alert('เกิดข้อผิดพลาดในการเปิดบอท: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error resuming bot:', error);
+                alert('เกิดข้อผิดพลาดในการเปิดบอท');
+            }
+        }
+        
+        // Helper functions
+        function formatTime(timestamp) {
+            if (!timestamp) return 'ไม่ทราบ';
+            return new Date(timestamp).toLocaleString('th-TH');
+        }
+        
+        function calculateMessagesTotal(users) {
+            if (!users) return 0;
+            const today = new Date().toDateString();
+            return users.reduce((total, user) => {
+                const todayMessages = user.conversationHistory?.filter(msg => 
+                    new Date(msg.timestamp).toDateString() === today
+                ).length || 0;
+                return total + todayMessages;
+            }, 0);
+        }
+        
+        function addLogEntry(user, action) {
+            const logsContainer = document.getElementById('logs-container');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-timestamp">[${formatTime(new Date())}]</span>
+                <span class="log-user">${user}</span>
+                <span class="log-action">${action}</span>
+            `;
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+        
+        // View conversation for specific user
+        async function viewConversation(userId) {
+            try {
+                const modal = document.getElementById('conversationModal');
+                const modalBody = document.getElementById('conversationModalBody');
+                
+                // Show modal
+                modal.style.display = 'block';
+                modalBody.innerHTML = '<div class="loading">กำลังโหลดข้อมูล...</div>';
+                
+                // Fetch conversation data
+                const response = await fetch(`/conversations/${userId}`);
+                const data = await response.json();
+                
+                if (data.success && data.conversationHistory.length > 0) {
+                    // Remove duplicates based on timestamp and message content
+                    const uniqueConversations = data.conversationHistory.filter((msg, index, arr) => {
+                        return arr.findIndex(item => 
+                            item.timestamp === msg.timestamp && 
+                            item.message === msg.message && 
+                            item.role === msg.role
+                        ) === index;
+                    });
+                    
+                    const conversationHtml = uniqueConversations.map((msg, index) => `
+                        <div class="conversation-item ${msg.role}">
+                            ${msg.role === 'assistant' ? 
+                                '<div class="message-avatar assistant">🐱</div>' : 
+                                ''
+                            }
+                            <div class="message-bubble ${msg.role}">
+                                <div>${msg.message}</div>
+                                <div class="message-time">${formatTime(msg.timestamp)}</div>
+                            </div>
+                            ${msg.role === 'user' ? 
+                                '<div class="message-avatar user">👤</div>' : 
+                                ''
+                            }
+                        </div>
+                    `).join('');
+                    
+                    modalBody.innerHTML = `
+                        <div style="margin-bottom: 20px;">
+                            <strong>👤 User ID:</strong> ${userId.substring(0, 30)}...<br>
+                            <strong>💬 ข้อความทั้งหมด:</strong> ${uniqueConversations.length} ข้อความ<br>
+                            <strong>📊 สถานะบอท:</strong> <span class="bot-status ${data.botStatus === 'active' ? 'bot-active' : 'bot-paused'}">${data.botStatus === 'active' ? '🤖 ใช้งาน' : '⏸️ หยุด'}</span>
+                        </div>
+                        <hr style="margin: 20px 0; border: 1px solid #eee;">
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            ${conversationHtml}
+                        </div>
+                    `;
+                } else {
+                    modalBody.innerHTML = `
+                        <div class="conversation-empty">
+                            <div style="font-size: 3em; margin-bottom: 20px;">😴</div>
+                            <h3>ยังไม่มีการสนทนา</h3>
+                            <p>ผู้ใช้คนนี้ยังไม่ได้สนทนากับมีตังค์</p>
+                            <br>
+                            <strong>👤 User ID:</strong> ${userId.substring(0, 30)}...
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading conversation:', error);
+                document.getElementById('conversationModalBody').innerHTML = `
+                    <div class="conversation-empty">
+                        <div style="font-size: 3em; margin-bottom: 20px;">❌</div>
+                        <h3>เกิดข้อผิดพลาด</h3>
+                        <p>ไม่สามารถโหลดประวัติการสนทนาได้</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Close conversation modal
+        function closeConversationModal() {
+            document.getElementById('conversationModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('conversationModal');
+            if (event.target === modal) {
+                closeConversationModal();
+            }
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+    </body>
+</html>

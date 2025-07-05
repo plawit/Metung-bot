@@ -1,0 +1,321 @@
+Gemini Vision API initialized successfully
+Initializing Google Sheets Service...
+Google Sheets service initialized successfully
+Skipping header initialization - will add headers when first record is added
+Initializing Vector Service...
+Connected to Pinecone index: finance-assistant
+Processing 2 documents...
+Successfully uploaded 2 vectors to Pinecone
+Processed 2 document chunks
+RecordMoney LINE Bot listening on port 8080
+AI Message Classifier: "ซื้อของ 50"
+AI Message Classifier Raw Response: ```json
+{
+  "messageType": "finance",
+  "needsFinanceProcessing": true,
+  "response": "รับทราบจ้า~ ซื้อของ 50 บาทน้าา 💸",
+  "extractedData": {
+    "รายการ": "ซื้อของ",
+    "จำนวน": 50,
+    "บริบท": "ซื้อสินค้า"
+  }
+}
+```
+Extracted JSON text: {
+  "messageType": "finance",
+  "needsFinanceProcessing": true,
+  "response": "รับทราบจ้า~ ซื้อของ 50 บาทน้าา 💸",
+  "extractedData": {
+    "รายการ": "ซื้อของ",
+    "จำนวน": 50,
+    "บริบท": "ซื้อสินค้า"
+  }
+}
+AI Message Classifier Success: {
+  messageType: 'finance',
+  needsFinanceProcessing: true,
+  response: 'รับทราบจ้า~ ซื้อของ 50 บาทน้าา 💸',
+  extractedData: { 'รายการ': 'ซื้อของ', 'จำนวน': 50, 'บริบท': 'ซื้อสินค้า' }
+}
+AI Classification: finance, Finance: true
+AI Data Validator: "ซื้อของ 50"
+AI Data Validator Raw Response: ```json
+{
+  "isFinanceRelated": true,
+  "isComplete": false,
+  "extractedData": {
+    "รายการ": "ของ",
+    "จำนวน": 50
+  },
+  "missingFields": [
+    "ประเภท",
+    "หมวดหมู่"
+  ],
+  "nextQuestion": "ซื้อของ 50 บาท เป็นรายจ่ายประเภทใด และอยู่ในหมวดหมู่ไหนคะ?",
+  "confidence": 0.7
+}
+```
+Extracted JSON text: {
+  "isFinanceRelated": true,
+  "isComplete": false,
+  "extractedData": {
+    "รายการ": "ของ",
+    "จำนวน": 50
+  },
+  "missingFields": [
+    "ประเภท",
+    "หมวดหมู่"
+  ],
+  "nextQuestion": "ซื้อของ 50 บาท เป็นรายจ่ายประเภทใด และอยู่ในหมวดหมู่ไหนคะ?",
+  "confidence": 0.7
+}
+AI Data Validator Success: {
+  isFinanceRelated: true,
+  isComplete: false,
+  extractedData: { 'รายการ': 'ของ', 'จำนวน': 50, 'ลงวันที่': '4/7/2568' },
+  missingFields: [ 'ประเภท', 'หมวดหมู่' ],
+  nextQuestion: 'ซื้อของ 50 บาท เป็นรายจ่ายประเภทใด และอยู่ในหมวดหมู่ไหนคะ?',
+  confidence: 0.7
+}
+AI Validation Result: Complete=false, Confidence=0.7
+AI Message Classifier: "ซื้อโค้ก 50"
+AI Message Classifier Raw Response: ```json
+{
+  "messageType": "finance",
+  "needsFinanceProcessing": true,
+  "response": "โค้ก 50 บาท เป็นรายจ่ายประเภทใด และอยู่ในหมวดหมู่ไหนคะ? 🐱🥤",
+  "extractedData": {
+    "รายการ": "โค้ก",
+    "จำนวน": 50,
+    "บริบท": "ซื้อเครื่องดื่ม"
+  }
+}
+```
+Extracted JSON text: {
+  "messageType": "finance",
+  "needsFinanceProcessing": true,
+  "response": "โค้ก 50 บาท เป็นรายจ่ายประเภทใด และอยู่ในหมวดหมู่ไหนคะ? 🐱🥤",
+  "extractedData": {
+    "รายการ": "โค้ก",
+    "จำนวน": 50,
+    "บริบท": "ซื้อเครื่องดื่ม"
+  }
+}
+AI Message Classifier Success: {
+  messageType: 'finance',
+  needsFinanceProcessing: true,
+  response: 'โค้ก 50 บาท เป็นรายจ่ายประเภทใด และอยู่ในหมวดหมู่ไหนคะ? 🐱🥤',
+  extractedData: { 'รายการ': 'โค้ก', 'จำนวน': 50, 'บริบท': 'ซื้อเครื่องดื่ม' }
+}
+AI Classification: finance, Finance: true
+AI Data Validator: "ซื้อโค้ก 50"
+AI Data Validator Raw Response: ```json
+{
+  "isFinanceRelated": true,
+  "isComplete": true,
+  "extractedData": {
+    "รายการ": "โค้ก",
+    "จำนวน": 50,
+    "ประเภท": "รายจ่าย",
+    "หมวดหมู่": "เครื่องดื่ม",
+    "ลงวันที่": "4/7/2568"
+  },
+  "missingFields": [],
+  "nextQuestion": "",
+  "confidence": 0.95
+}
+```
+Extracted JSON text: {
+  "isFinanceRelated": true,
+  "isComplete": true,
+  "extractedData": {
+    "รายการ": "โค้ก",
+    "จำนวน": 50,
+    "ประเภท": "รายจ่าย",
+    "หมวดหมู่": "เครื่องดื่ม",
+    "ลงวันที่": "4/7/2568"
+  },
+  "missingFields": [],
+  "nextQuestion": "",
+  "confidence": 0.95
+}
+AI Data Validator Success: {
+  isFinanceRelated: true,
+  isComplete: true,
+  extractedData: {
+    'รายการ': 'โค้ก',
+    'จำนวน': 50,
+    'ประเภท': 'รายจ่าย',
+    'หมวดหมู่': 'เครื่องดื่ม',
+    'ลงวันที่': '4/7/2568'
+  },
+  missingFields: [],
+  nextQuestion: '',
+  confidence: 0.95
+}
+AI Validation Result: Complete=true, Confidence=0.95
+Saved: โค้ก 50 บาท (เครื่องดื่ม)
+✅ Added finance record to Google Sheets: โค้ก 50 บาท (RefID: 3)
+Fetched 3 records from Google Sheets
+Fetched 0 records from Google Sheets
+Fetched 3 records from Google Sheets
+AI Message Classifier: "ค่าอาหารแมว 1000"
+AI Message Classifier Raw Response: ```json
+{
+  "messageType": "finance",
+  "needsFinanceProcessing": true,
+  "response": "รับทราบจ้า~ 🐱 บันทึกค่าอาหารแมว 1000 บาทแล้วน้า 🐾",
+  "extractedData": {
+    "รายการ": "ค่าอาหารแมว",
+    "จำนวน": 1000,
+    "บริบท": "ค่าใช้จ่ายเกี่ยวกับสัตว์เลี้ยง"
+  }
+}
+```
+Extracted JSON text: {
+  "messageType": "finance",
+  "needsFinanceProcessing": true,
+  "response": "รับทราบจ้า~ 🐱 บันทึกค่าอาหารแมว 1000 บาทแล้วน้า 🐾",
+  "extractedData": {
+    "รายการ": "ค่าอาหารแมว",
+    "จำนวน": 1000,
+    "บริบท": "ค่าใช้จ่ายเกี่ยวกับสัตว์เลี้ยง"
+  }
+}
+AI Message Classifier Success: {
+  messageType: 'finance',
+  needsFinanceProcessing: true,
+  response: 'รับทราบจ้า~ 🐱 บันทึกค่าอาหารแมว 1000 บาทแล้วน้า 🐾',
+  extractedData: {
+    'รายการ': 'ค่าอาหารแมว',
+    'จำนวน': 1000,
+    'บริบท': 'ค่าใช้จ่ายเกี่ยวกับสัตว์เลี้ยง'
+  }
+}
+AI Classification: finance, Finance: true
+AI Data Validator: "ค่าอาหารแมว 1000"
+AI Data Validator Raw Response: ```json
+{
+  "isFinanceRelated": true,
+  "isComplete": true,
+  "extractedData": {
+    "รายการ": "ค่าอาหารแมว",
+    "จำนวน": 1000,
+    "ประเภท": "รายจ่าย",
+    "หมวดหมู่": "เบ็ดเตล็ด",
+    "ลงวันที่": "วันที่ปัจจุบัน"
+  },
+  "missingFields": [],
+  "nextQuestion": "",
+  "confidence": 0.95
+}
+```
+Extracted JSON text: {
+  "isFinanceRelated": true,
+  "isComplete": true,
+  "extractedData": {
+    "รายการ": "ค่าอาหารแมว",
+    "จำนวน": 1000,
+    "ประเภท": "รายจ่าย",
+    "หมวดหมู่": "เบ็ดเตล็ด",
+    "ลงวันที่": "วันที่ปัจจุบัน"
+  },
+  "missingFields": [],
+  "nextQuestion": "",
+  "confidence": 0.95
+}
+AI Data Validator Success: {
+  isFinanceRelated: true,
+  isComplete: true,
+  extractedData: {
+    'รายการ': 'ค่าอาหารแมว',
+    'จำนวน': 1000,
+    'ประเภท': 'รายจ่าย',
+    'หมวดหมู่': 'เบ็ดเตล็ด',
+    'ลงวันที่': 'วันที่ปัจจุบัน'
+  },
+  missingFields: [],
+  nextQuestion: '',
+  confidence: 0.95
+}
+AI Validation Result: Complete=true, Confidence=0.95
+Saved: ค่าอาหารแมว 1000 บาท (เบ็ดเตล็ด)
+✅ Added finance record to Google Sheets: ค่าอาหารแมว 1000 บาท (RefID: 4)
+Fetched 1 records from Google Sheets
+AI Message Classifier: "ข่าวเกี่ยวกับการเงิน เศรษฐกิจ การลงทุน"
+AI Message Classifier Raw Response: ```json
+{
+  "messageType": "general",
+  "needsFinanceProcessing": false,
+  "response": "มีตังค์บันทึกแค่รายรับรายจ่ายน้าา 🐾 ถ้ามีอะไรให้ช่วยเรื่องนี้บอกได้เลยจ้า~ 🐱",
+  "extractedData": {}
+}
+```
+Extracted JSON text: {
+  "messageType": "general",
+  "needsFinanceProcessing": false,
+  "response": "มีตังค์บันทึกแค่รายรับรายจ่ายน้าา 🐾 ถ้ามีอะไรให้ช่วยเรื่องนี้บอกได้เลยจ้า~ 🐱",
+  "extractedData": {}
+}
+AI Message Classifier Success: {
+  messageType: 'general',
+  needsFinanceProcessing: false,
+  response: 'มีตังค์บันทึกแค่รายรับรายจ่ายน้าา 🐾 ถ้ามีอะไรให้ช่วยเรื่องนี้บอกได้เลยจ้า~ 🐱',
+  extractedData: {}
+}
+AI Classification: general, Finance: false
+Received image from user: U0a84b4e446ce7199ac51743424217e78
+Using Gemini Vision API for OCR...
+Gemini Vision OCR result: นี่คือข้อมูลที่แยกจากสลิปธนาคาร:
+
+1. **จำนวนเงิน (ตัวเลขและหน่วยเงิน):** 1,517.80 บาท
+
+2. **ชื่อผู้รับเงิน/ร้านค้า:** บมจ.เมืองไทยประกันชีวิต (ขายทางโทรศัพท์)
+
+3. **วันที่และเวลา:** 05 ก.ย. 2567 - 10:56
+
+4. **ประเภทการทำรายการ:** จ่ายบิล
+
+5. **ธนาคาร:** SCB (ธนาคารไทยพาณิชย์)
+
+Using AI to parse slip data...
+AI parsing result: ```json
+{
+  "รายการ": "บมจ.เมืองไทยประกันชีวิต",
+  "จำนวน": 1517.80,
+  "ประเภท": "รายจ่าย",
+  "หมวดหมู่": "อื่นๆ",
+  "ลงวันที่": "5/9/2567",
+  "confidence": 1.0,
+  "needsDescription": false
+}
+```
+
+Parsed slip data: {
+  'รายการ': 'บมจ.เมืองไทยประกันชีวิต',
+  'จำนวน': 1517.8,
+  'ประเภท': 'รายจ่าย',
+  'หมวดหมู่': 'อื่นๆ',
+  'ลงวันที่': '5/9/2567',
+  confidence: 1,
+  sourceType: 'bank_slip',
+  rawText: 'นี่คือข้อมูลที่แยกจากสลิปธนาคาร:\n' +
+    '\n' +
+    '1. **จำนวนเงิน (ตัวเลขและหน่วยเงิน):** 1,517.80 บาท\n' +
+    '\n' +
+    '2. **ชื่อผู้ร',
+  needsDescription: false,
+  extractedInfo: {
+    amount: 1517.8,
+    date: '5/9/2567',
+    rawText: 'นี่คือข้อมูลที่แยกจากสลิปธนาคาร:\n' +
+      '\n' +
+      '1. **จำนวนเงิน (ตัวเลขและหน่วยเงิน):** 1,517.80 บาท\n' +
+      '\n' +
+      '2. **ชื่อผู้รับเงิน/ร้านค้า:** บมจ.เมืองไทยประกันชีวิต (ขายทางโทรศัพท์)\n' +
+      '\n' +
+      '3. **วันที่และเวลา:** 05 ก.ย. 2567 - 10:'
+  }
+}
+✅ Added finance record to Google Sheets: บมจ.เมืองไทยประกันชีวิต 1517.8 บาท (RefID: 5)
+Fetched 2 records from Google Sheets

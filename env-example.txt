@@ -1,0 +1,25 @@
+# LINE Bot Configuration
+LINE_CHANNEL_ACCESS_TOKEN=your_line_channel_access_token_here
+LINE_CHANNEL_SECRET=your_line_channel_secret_here
+
+# Google AI
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Pinecone Vector Database
+PINECONE_API_KEY=your_pinecone_api_key_here
+PINECONE_ENVIRONMENT=your_pinecone_environment_here
+PINECONE_INDEX_NAME=finance-assistant
+
+# Google Sheets
+GOOGLE_SHEETS_SPREADSHEET_ID=your_google_sheets_spreadsheet_id_here
+GOOGLE_SHEETS_SHEET_NAME=บันทึกรายการรายรับรายจ่าย
+GOOGLE_CLIENT_EMAIL=your_service_account_email_here
+GOOGLE_PRIVATE_KEY=your_service_account_private_key_here
+
+# Pipecode (Optional)
+PIPECODE_API_URL=https://yourpipecode.domain.com
+PIPECODE_API_KEY=your_pipecode_api_key_here
+PIPECODE_PORT=8080
+
+# Server
+PORT=8080

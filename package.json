@@ -1,0 +1,37 @@
+{
+  "name": "recordmoney-line-bot",
+  "version": "1.0.0",
+  "description": "LINE Chatbot for RecordMoney - Income and Expense Tracking Assistant",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test-pipecode": "curl -X GET http://localhost:3000/test-pipecode",
+    "pipecode-status": "curl -X GET http://localhost:3000/pipecode-status"
+  },
+  "keywords": [
+    "line-bot",
+    "chatbot",
+    "expense-tracker",
+    "recordmoney"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/vision": "^5.2.0",
+    "@google/generative-ai": "^0.24.1",
+    "@line/bot-sdk": "^7.5.2",
+    "@pinecone-database/pinecone": "^6.1.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "googleapis": "^150.0.1",
+    "multer": "^2.0.1",
+    "sharp": "^0.34.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
