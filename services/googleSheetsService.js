@@ -24,18 +24,18 @@ class GoogleSheetsService {
       // Load service account credentials
       const credentials = JSON.parse(fs.readFileSync(keyFilePath, 'utf8'));
       
-      // Create JWT auth with additional scopes
-      this.auth = new google.auth.JWT({
-        email: credentials.client_email,
-        key: credentials.private_key,
+      // Debug: Check if private key starts and ends correctly
+      console.log('Private key starts with:', credentials.private_key.substring(0, 30));
+      console.log('Private key ends with:', credentials.private_key.substring(credentials.private_key.length - 30));
+      
+      // Create JWT auth using the key file path directly
+      this.auth = new google.auth.GoogleAuth({
+        keyFile: keyFilePath,
         scopes: [
           'https://www.googleapis.com/auth/spreadsheets',
           'https://www.googleapis.com/auth/drive.file'
         ]
       });
-
-      // Authorize the JWT client
-      await this.auth.authorize();
 
       // Initialize sheets API
       this.sheets = google.sheets({ version: 'v4', auth: this.auth });

@@ -8,7 +8,7 @@ const PipecodeService = require("./services/pipecodeService");
 const AIDataValidator = require("./services/aiDataValidator");
 const AIClassifier = require("./services/aiClassifier");
 const AIMessageClassifier = require("./services/aiMessageClassifier");
-const GoogleSheetsService = require("./services/googleSheetsService");
+const SupabaseService = require("./services/supabaseService");
 const FlexMessageTemplates = require("./services/flexMessageTemplates");
 const FinancialReportService = require("./services/financialReportService");
 const BankSlipOCR = require("./services/bankSlipOCR");
@@ -103,7 +103,7 @@ const vectorService = new VectorService();
 const aiDataValidator = new AIDataValidator(vectorService);
 const aiClassifier = new AIClassifier();
 const aiMessageClassifier = new AIMessageClassifier(vectorService);
-const googleSheetsService = new GoogleSheetsService();
+const supabaseService = new SupabaseService();
 const bankSlipOCR = new BankSlipOCR();
 const pipecodeService = new PipecodeService({
   host: process.env.PIPECODE_HOST || "localhost",
@@ -256,16 +256,16 @@ async function callGeminiAI(userMessage, currentData, userId) {
     financeData.push(completeData);
     console.log(`Saved: ${completeData.รายการ} ${completeData.จำนวน} บาท (${completeData.หมวดหมู่})`);
     
-    // บันทึกลง Google Sheets
+    // บันทึกลง Supabase
     let refId = null;
     try {
-      const sheetsResult = await googleSheetsService.addFinanceRecord(userId, completeData);
-      if (sheetsResult && sheetsResult.success) {
-        refId = sheetsResult.refId;
+      const supabaseResult = await supabaseService.addFinanceRecord(userId, completeData);
+      if (supabaseResult && supabaseResult.success) {
+        refId = supabaseResult.refId;
         completeData.refId = refId; // เก็บ refId ใน local data ด้วย
       }
-    } catch (sheetsError) {
-      console.error('Failed to log to Google Sheets:', sheetsError);
+    } catch (supabaseError) {
+      console.error('Failed to log to Supabase:', supabaseError);
     }
     
     // ล้างข้อมูล pending ของ user
@@ -296,22 +296,22 @@ async function generateFinancialReport(reportType, userMessage, userId, financeD
   try {
     switch (reportType) {
       case 'daily_summary':
-        const dailyData = await FinancialReportService.calculateDailySummary(financeData, null, googleSheetsService, userId);
+        const dailyData = await FinancialReportService.calculateDailySummary(financeData, null, supabaseService, userId);
         return FlexMessageTemplates.createDailySummary(dailyData);
         
       case 'daily_transactions':
-        const dailyTransactions = await FinancialReportService.calculateDailySummary(financeData, null, googleSheetsService, userId);
+        const dailyTransactions = await FinancialReportService.calculateDailySummary(financeData, null, supabaseService, userId);
         return FlexMessageTemplates.createTransactionList({
           date: dailyTransactions.date,
           transactions: dailyTransactions.transactionList
         });
         
       case 'monthly_summary':
-        const monthlyData = await FinancialReportService.calculateMonthlySummary(financeData, null, null, googleSheetsService, userId);
+        const monthlyData = await FinancialReportService.calculateMonthlySummary(financeData, null, null, supabaseService, userId);
         return FlexMessageTemplates.createMonthlySummary(monthlyData);
         
       case 'balance_report':
-        const balanceData = await FinancialReportService.calculateBalanceReport(financeData, googleSheetsService, userId);
+        const balanceData = await FinancialReportService.calculateBalanceReport(financeData, supabaseService, userId);
         return FlexMessageTemplates.createBalanceReport(balanceData);
         
       case 'recent_transactions':
@@ -411,14 +411,14 @@ async function handleImageMessage(event) {
         timestamp: new Date().toISOString()
       });
       
-      // บันทึกลง Google Sheets
+      // บันทึกลง Supabase
       try {
-        const sheetsResult = await googleSheetsService.addFinanceRecord(userId, parsedData);
-        if (sheetsResult && sheetsResult.success) {
-          parsedData.refId = sheetsResult.refId;
+        const supabaseResult = await supabaseService.addFinanceRecord(userId, parsedData);
+        if (supabaseResult && supabaseResult.success) {
+          parsedData.refId = supabaseResult.refId;
         }
-      } catch (sheetsError) {
-        console.error('Failed to log slip to Google Sheets:', sheetsError);
+      } catch (supabaseError) {
+        console.error('Failed to log slip to Supabase:', supabaseError);
       }
       
       // บันทึกประวัติการสนทนา
@@ -554,14 +554,14 @@ async function handleEvent(event) {
           timestamp: new Date().toISOString()
         });
         
-        // บันทึกลง Google Sheets
+        // บันทึกลง Supabase
         try {
-          const sheetsResult = await googleSheetsService.addFinanceRecord(userId, pendingSlip);
-          if (sheetsResult && sheetsResult.success) {
-            pendingSlip.refId = sheetsResult.refId;
+          const supabaseResult = await supabaseService.addFinanceRecord(userId, pendingSlip);
+          if (supabaseResult && supabaseResult.success) {
+            pendingSlip.refId = supabaseResult.refId;
           }
-        } catch (sheetsError) {
-          console.error('Failed to log slip to Google Sheets:', sheetsError);
+        } catch (supabaseError) {
+          console.error('Failed to log slip to Supabase:', supabaseError);
         }
       }
       
@@ -647,11 +647,11 @@ async function handleEvent(event) {
           if (newEntry.ลงวันที่ && newEntry.รายการ && newEntry.ประเภท && newEntry.จำนวน && newEntry.หมวดหมู่) {
             financeData.push(newEntry);
             
-            // บันทึกลง Google Sheets
+            // บันทึกลง Supabase
             try {
-              await googleSheetsService.addFinanceRecord(userId, newEntry);
-            } catch (sheetsError) {
-              console.error('Failed to log to Google Sheets:', sheetsError);
+              await supabaseService.addFinanceRecord(userId, newEntry);
+            } catch (supabaseError) {
+              console.error('Failed to log to Supabase:', supabaseError);
             }
             
             // ล้างข้อมูล pending ของ user
@@ -749,11 +749,11 @@ function getQuickReplyMenu() {
 // Initialize vector service and start server
 async function startServer() {
   try {
-    // Initialize Google Sheets service first (no network dependency)
-    console.log("Initializing Google Sheets Service...");
-    const sheetsInitialized = await googleSheetsService.initialize();
-    if (sheetsInitialized) {
-      await googleSheetsService.initializeHeaders();
+    // Initialize Supabase service first
+    console.log("Initializing Supabase Service...");
+    const supabaseInitialized = await supabaseService.initialize();
+    if (supabaseInitialized) {
+      console.log('Supabase service initialized successfully');
     }
 
     // Initialize Vector Service with retry and timeout
@@ -1092,11 +1092,11 @@ app.post("/admin/add-test-data", express.json(), (req, res) => {
   }
 });
 
-// Google Sheets API endpoints
-app.get("/google-sheets/find/:refId", async (req, res) => {
+// Supabase API endpoints
+app.get("/supabase/find/:refId", async (req, res) => {
   try {
     const { refId } = req.params;
-    const result = await googleSheetsService.getRecordByRefId(refId);
+    const result = await supabaseService.getRecordByRefId(refId);
     res.json(result);
   } catch (error) {
     res.status(500).json({
@@ -1106,11 +1106,11 @@ app.get("/google-sheets/find/:refId", async (req, res) => {
   }
 });
 
-app.put("/google-sheets/update/:refId", async (req, res) => {
+app.put("/supabase/update/:refId", async (req, res) => {
   try {
     const { refId } = req.params;
     const updateData = req.body;
-    const result = await googleSheetsService.updateRecordByRefId(refId, updateData);
+    const result = await supabaseService.updateRecordByRefId(refId, updateData);
     res.json(result);
   } catch (error) {
     res.status(500).json({
@@ -1119,23 +1119,23 @@ app.put("/google-sheets/update/:refId", async (req, res) => {
     });
   }
 });
-app.get("/google-sheets/test", async (req, res) => {
+app.get("/supabase/test", async (req, res) => {
   try {
-    const result = await googleSheetsService.testConnection();
+    const result = await supabaseService.testConnection();
     res.json(result);
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Failed to test Google Sheets connection",
+      message: "Failed to test Supabase connection",
       error: error.message
     });
   }
 });
 
-app.get("/google-sheets/recent", async (req, res) => {
+app.get("/supabase/recent", async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
-    const result = await googleSheetsService.getRecentRecords(limit);
+    const result = await supabaseService.getRecentRecords(limit);
     if (result.error) {
       return res.status(500).json({
         success: false,
@@ -1155,7 +1155,7 @@ app.get("/google-sheets/recent", async (req, res) => {
   }
 });
 
-app.post("/google-sheets/test-record", express.json(), async (req, res) => {
+app.post("/supabase/test-record", express.json(), async (req, res) => {
   try {
     const testData = {
       รายการ: "ทดสอบระบบ",
@@ -1165,7 +1165,7 @@ app.post("/google-sheets/test-record", express.json(), async (req, res) => {
       ลงวันที่: new Date().toLocaleDateString('th-TH')
     };
     
-    const result = await googleSheetsService.addFinanceRecord("test-user-123", testData);
+    const result = await supabaseService.addFinanceRecord("test-user-123", testData);
     res.json({
       success: result,
       message: result ? "Test record added successfully" : "Failed to add test record",
