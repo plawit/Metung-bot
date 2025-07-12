@@ -55,6 +55,8 @@ class SupabaseService {
         record_date: financeData.ลงวันที่ || ''
       };
 
+      console.log('📝 Adding record to Supabase:', recordData);
+
       // Insert record into Supabase
       const { data, error } = await this.supabase
         .from(this.tableName)
@@ -218,7 +220,10 @@ class SupabaseService {
       // Filter by userId if provided
       if (userId) {
         const userIdShort = userId.substring(userId.length - 8);
+        console.log(`🔍 Filtering by userId: ${userId} -> ${userIdShort}`);
         query = query.eq('user_id', userIdShort);
+      } else {
+        console.log('🔍 No userId filter - showing all records');
       }
 
       const { data, error } = await query;
@@ -226,6 +231,11 @@ class SupabaseService {
       if (error) {
         console.error('Error getting recent records:', error);
         return { error: error.message };
+      }
+
+      console.log(`🔍 Query returned ${data.length} records`);
+      if (data.length > 0) {
+        console.log('Sample records user_ids:', data.slice(0, 3).map(r => r.user_id));
       }
 
       return { 

@@ -1,44 +1,45 @@
 // Financial Report Service - จัดการข้อมูลการเงินเพื่อสร้างรายงาน
 class FinancialReportService {
   
-  // ดึงข้อมูลจาก Google Sheets สำหรับ user เฉพาะ
-  static async getDataFromGoogleSheets(googleSheetsService, userId = null) {
+  // ดึงข้อมูลจาก Supabase สำหรับ user เฉพาะ
+  static async getDataFromSupabase(supabaseService, userId = null) {
     try {
-      if (!googleSheetsService || !googleSheetsService.sheets) {
-        console.warn('Google Sheets service not available');
+      if (!supabaseService || !supabaseService.supabase) {
+        console.warn('Supabase service not available');
         return [];
       }
 
-      // ดึงข้อมูลจาก Google Sheets (ลดจำนวนลง) และ filter ตาม userId
-      const sheetsData = await Promise.race([
-        googleSheetsService.getRecentRecords(100, userId), // เพิ่ม userId parameter
+      // ดึงข้อมูลจาก Supabase และ filter ตาม userId
+      const supabaseData = await Promise.race([
+        supabaseService.getRecentRecords(100, userId), // เพิ่ม userId parameter
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Google Sheets timeout')), 5000)
+          setTimeout(() => reject(new Error('Supabase timeout')), 5000)
         )
       ]);
       
-      if (sheetsData.error) {
-        console.warn('Error fetching from Google Sheets:', sheetsData.error);
+      if (supabaseData.error) {
+        console.warn('Error fetching from Supabase:', supabaseData.error);
         return [];
       }
 
-      // แปลงข้อมูลจาก Google Sheets format เป็น format ที่ใช้ในระบบ
-      const formattedData = sheetsData.records?.filter(record => 
+      // แปลงข้อมูลจาก Supabase format เป็น format ที่ใช้ในระบบ
+      const formattedData = supabaseData.records?.filter(record => 
         record.refId && record.refId !== 'refId' // ข้าม header row
       ).map(record => ({
         refId: record.refId,
         รายการ: record.รายการ,
-        จำนวน: parseFloat(record.จำนวน || 0), // ข้อมูลจำนวนอยู่ใน column จำนวน (แก้แล้ว)
+        จำนวน: parseFloat(record.จำนวน || 0),
         ประเภท: record.ประเภท,
-        หมวดหมู่: record.หมวดรายการ, // ข้อมูลหมวดหมู่อยู่ใน column หมวดรายการ (แก้แล้ว)
+        หมวดหมู่: record.หมวดรายการ,
         ลงวันที่: this.extractDateFromTimestamp(record.ลงวันที่), // แปลงเป็นรูปแบบวันที่ไทย
         timestamp: record.ลงวันที่
       })) || [];
 
-      console.log(`Fetched ${formattedData.length} records from Google Sheets`);
+      console.log(`Fetched ${formattedData.length} records from Supabase for user: ${userId ? userId.substring(userId.length - 8) : 'all'}`);
+      console.log('Sample formatted data:', formattedData.slice(0, 2));
       return formattedData;
     } catch (error) {
-      console.error('Error fetching data from Google Sheets:', error);
+      console.error('Error fetching data from Supabase:', error);
       return [];
     }
   }
@@ -48,6 +49,12 @@ class FinancialReportService {
     if (!timestamp) return '';
     
     try {
+      // ถ้าเป็นรูปแบบ ISO (2025-07-05T09:40:57.043+00:00) แปลงเป็นรูปแบบไทย
+      if (timestamp.includes('T')) {
+        const date = new Date(timestamp);
+        return date.toLocaleDateString('th-TH');
+      }
+      
       // ถ้าเป็นรูปแบบ "4/7/2568 12:37:04" แยกเอาเฉพาะวันที่
       if (timestamp.includes(' ')) {
         return timestamp.split(' ')[0];
@@ -60,12 +67,14 @@ class FinancialReportService {
   }
   
   // คำนวณสรุปรายวัน
-  static async calculateDailySummary(financeData, targetDate = null, googleSheetsService = null, userId = null) {
-    // ใช้ข้อมูลจาก Google Sheets เป็นหลัก, local data เป็นรอง
+  static async calculateDailySummary(financeData, targetDate = null, supabaseService = null, userId = null) {
+    // ใช้ข้อมูลจาก Supabase เป็นหลัก, local data เป็นรอง
     let allData = [];
-    if (googleSheetsService) {
-      const sheetsData = await this.getDataFromGoogleSheets(googleSheetsService, userId);
-      allData = sheetsData;
+    if (supabaseService) {
+      console.log('📊 [DAILY] Fetching data from Supabase for userId:', userId);
+      const supabaseData = await this.getDataFromSupabase(supabaseService, userId);
+      allData = supabaseData;
+      console.log('📊 [DAILY] Got', allData.length, 'records from Supabase');
     } else {
       // Filter local data by userId if provided
       allData = financeData || [];
@@ -102,12 +111,12 @@ class FinancialReportService {
   }
   
   // คำนวณสรุปรายเดือน
-  static async calculateMonthlySummary(financeData, month = null, year = null, googleSheetsService = null, userId = null) {
-    // ใช้ข้อมูลจาก Google Sheets เป็นหลัก, local data เป็นรอง
+  static async calculateMonthlySummary(financeData, month = null, year = null, supabaseService = null, userId = null) {
+    // ใช้ข้อมูลจาก Supabase เป็นหลัก, local data เป็นรอง
     let allData = [];
-    if (googleSheetsService) {
-      const sheetsData = await this.getDataFromGoogleSheets(googleSheetsService, userId);
-      allData = sheetsData;
+    if (supabaseService) {
+      const supabaseData = await this.getDataFromSupabase(supabaseService, userId);
+      allData = supabaseData;
     } else {
       // Filter local data by userId if provided
       allData = financeData || [];
@@ -167,12 +176,12 @@ class FinancialReportService {
   }
   
   // คำนวณยอดคงเหลือและสถิติ
-  static async calculateBalanceReport(financeData, googleSheetsService = null, userId = null) {
-    // ใช้ข้อมูลจาก Google Sheets เป็นหลัก, local data เป็นรอง
+  static async calculateBalanceReport(financeData, supabaseService = null, userId = null) {
+    // ใช้ข้อมูลจาก Supabase เป็นหลัก, local data เป็นรอง
     let allData = [];
-    if (googleSheetsService) {
-      const sheetsData = await this.getDataFromGoogleSheets(googleSheetsService, userId);
-      allData = sheetsData;
+    if (supabaseService) {
+      const supabaseData = await this.getDataFromSupabase(supabaseService, userId);
+      allData = supabaseData;
     } else {
       // Filter local data by userId if provided
       allData = financeData || [];
