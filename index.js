@@ -394,7 +394,7 @@ async function generateFinancialReport(
             supabaseService,
             userId
           );
-        return FlexMessageTemplates.createMonthlySummary(monthlyData);
+        return FlexMessageTemplates.createSimpleMonthlySummary(monthlyData);
 
       case "balance_report":
         const balanceData = await FinancialReportService.calculateBalanceReport(

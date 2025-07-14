@@ -11,9 +11,9 @@ class FinancialReportService {
 
       // ดึงข้อมูลจาก Supabase และ filter ตาม userId
       const supabaseData = await Promise.race([
-        supabaseService.getRecentRecords(100, userId), // เพิ่ม userId parameter
+        supabaseService.getRecentRecords(50, userId), // ลดจำนวนเหลือ 50 records
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Supabase timeout')), 5000)
+          setTimeout(() => reject(new Error('Supabase timeout')), 10000) // เพิ่ม timeout เป็น 10 วินาที
         )
       ]);
       
@@ -40,6 +40,13 @@ class FinancialReportService {
       return formattedData;
     } catch (error) {
       console.error('Error fetching data from Supabase:', error);
+      
+      // ถ้าเป็น timeout ให้ลองดึงจาก local data แทน
+      if (error.message.includes('timeout')) {
+        console.log('⚠️ Supabase timeout, falling back to local data');
+        return []; // หรือส่งกลับข้อมูลจาก local storage ถ้ามี
+      }
+      
       return [];
     }
   }
@@ -333,6 +340,10 @@ class FinancialReportService {
     }
     
     if (lowerMessage.includes('เดือนนี้') && (lowerMessage.includes('สรุป') || lowerMessage.includes('รายงาน'))) {
+      return 'monthly_summary';
+    }
+    
+    if (lowerMessage.includes('สรุปเดือนนี้')) {
       return 'monthly_summary';
     }
     

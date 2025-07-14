@@ -28,7 +28,7 @@ class SupabaseService {
   }
 
   // Add finance record to Supabase
-  async addFinanceRecord(userId, financeData) {
+  async addFinanceRecord(userId, financeData, retryCount = 0) {
     try {
       if (!this.supabase) {
         console.log('Supabase not initialized. Skipping record.');
@@ -65,6 +65,14 @@ class SupabaseService {
 
       if (error) {
         console.error('Error adding finance record to Supabase:', error);
+        
+        // If duplicate key error, retry with new refId
+        if (error.code === '23505' && retryCount < 3) {
+          console.log(`🔄 Duplicate key error, retrying... (${retryCount + 1}/3)`);
+          await new Promise(resolve => setTimeout(resolve, 200 * (retryCount + 1)));
+          return this.addFinanceRecord(userId, financeData, retryCount + 1);
+        }
+        
         return false;
       }
 
@@ -173,34 +181,76 @@ class SupabaseService {
     }
   }
 
-  // Get next sequential refId
-  async getNextRefId() {
+  // Get next sequential refId with retry mechanism
+  async getNextRefId(retryCount = 0) {
     try {
       if (!this.supabase) {
-        return '1'; // fallback if supabase not initialized
+        return Date.now().toString(); // fallback if supabase not initialized
       }
 
-      // Get the highest ref_id
+      // Get all ref_ids and find the highest numeric value
       const { data, error } = await this.supabase
         .from(this.tableName)
-        .select('ref_id')
-        .order('ref_id', { ascending: false })
-        .limit(1);
+        .select('ref_id');
 
       if (error) {
         console.error('Error getting next refId:', error);
-        return Date.now().toString().slice(-6); // fallback to timestamp-based
+        return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; // unique fallback
       }
 
+      let nextRefId;
       if (data.length === 0) {
-        return '1'; // First record
+        nextRefId = '1'; // First record
+      } else {
+        // Find the highest numeric ref_id
+        const numericRefIds = data
+          .map(row => parseInt(row.ref_id))
+          .filter(id => !isNaN(id))
+          .sort((a, b) => b - a);
+        
+        const lastRefId = numericRefIds.length > 0 ? numericRefIds[0] : 0;
+        nextRefId = (lastRefId + 1).toString();
+        
+        console.log(`🔍 Found ${data.length} records, highest numeric ref_id: ${lastRefId}, next: ${nextRefId}`);
       }
 
-      const lastRefId = parseInt(data[0].ref_id);
-      return (lastRefId + 1).toString();
+      // Try to reserve this ref_id by attempting to insert a placeholder
+      const { error: reserveError } = await this.supabase
+        .from(this.tableName)
+        .insert([{
+          ref_id: nextRefId,
+          created_at: new Date().toISOString(),
+          user_id: 'temp_placeholder',
+          item_name: 'PLACEHOLDER_RESERVED',
+          category: 'SYSTEM',
+          amount: 0,
+          type: 'PLACEHOLDER',
+          record_date: new Date().toLocaleDateString('th-TH')
+        }]);
+
+      if (reserveError) {
+        if (reserveError.code === '23505' && retryCount < 3) {
+          // Duplicate key, retry with next number
+          console.log(`RefId ${nextRefId} already exists, retrying... (${retryCount + 1}/3)`);
+          await new Promise(resolve => setTimeout(resolve, 100 * (retryCount + 1))); // exponential backoff
+          return this.getNextRefId(retryCount + 1);
+        } else {
+          // Use timestamp-based fallback for uniqueness
+          return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        }
+      }
+
+      // Successfully reserved, now delete the placeholder
+      await this.supabase
+        .from(this.tableName)
+        .delete()
+        .eq('ref_id', nextRefId)
+        .eq('item_name', 'PLACEHOLDER_RESERVED');
+
+      return nextRefId;
     } catch (error) {
       console.error('Error getting next refId:', error);
-      return Date.now().toString().slice(-6); // fallback to timestamp-based
+      return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; // unique fallback
     }
   }
 
@@ -213,7 +263,7 @@ class SupabaseService {
 
       let query = this.supabase
         .from(this.tableName)
-        .select('*')
+        .select('ref_id, created_at, user_id, item_name, category, amount, type, record_date') // เลือกเฉพาะ columns ที่ต้องการ
         .order('created_at', { ascending: false })
         .limit(limit);
 
